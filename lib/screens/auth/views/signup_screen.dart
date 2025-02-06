@@ -2,6 +2,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:shop/screens/auth/views/components/sign_up_form.dart';
 import 'package:shop/route/route_constants.dart';
+import 'package:shop/services/authservice.dart';
 
 import '../../../constants.dart';
 
@@ -14,6 +15,36 @@ class SignUpScreen extends StatefulWidget {
 
 class _SignUpScreenState extends State<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
+  bool _isChecked = false; // State for checkbox
+
+  void _handleSignUp(String email, String password,  String role, String phone) async {
+    if (_formKey.currentState!.validate() && _isChecked) { // Ensure checkbox is checked
+      setState(() {
+        _isLoading = true;
+      });
+
+      try {
+        bool success = await _authService.signup(email, password,  role, phone);
+        if (success) {
+          Navigator.pushNamed(context, entryPointScreenRoute);
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.toString())),
+        );
+      } finally {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } else if (!_isChecked) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please accept the terms and conditions.")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +72,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     "Please enter your valid data in order to create an account.",
                   ),
                   const SizedBox(height: defaultPadding),
-                  SignUpForm(formKey: _formKey),
+                  
+                  // Updated to pass phone field
+                  SignUpForm(
+                    formKey: _formKey,
+                    onSubmit: _handleSignUp,
+                  ),
+
                   const SizedBox(height: defaultPadding),
+                  
+                  // Checkbox for Terms & Conditions
                   Row(
                     children: [
                       Checkbox(
-                        onChanged: (value) {},
-                        value: false,
+                        value: _isChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            _isChecked = value!;
+                          });
+                        },
                       ),
                       Expanded(
                         child: Text.rich(
@@ -75,16 +118,22 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       )
                     ],
                   ),
+
                   const SizedBox(height: defaultPadding * 2),
-                  ElevatedButton(
-                    onPressed: () {
-                      // There is 2 more screens while user complete their profile
-                      // afre sign up, it's available on the pro version get it now
-                      // 🔗 https://theflutterway.gumroad.com/l/fluttershop
-                      Navigator.pushNamed(context, entryPointScreenRoute);
-                    },
-                    child: const Text("Continue"),
-                  ),
+
+                  // Continue button with loader
+                  if (_isLoading)
+                    const Center(child: CircularProgressIndicator()),
+                  if (!_isLoading)
+                    ElevatedButton(
+                      onPressed: () {
+                        if (_formKey.currentState!.validate()) {
+                          _formKey.currentState!.save(); // Save form fields
+                        }
+                      },
+                      child: const Text("Continue"),
+                    ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
