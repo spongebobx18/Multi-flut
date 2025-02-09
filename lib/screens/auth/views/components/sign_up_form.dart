@@ -5,7 +5,8 @@ import '../../../../constants.dart';
 
 class SignUpForm extends StatefulWidget {
   final GlobalKey<FormState> formKey;
-  final Function(String email, String password, String phone, String role) onSubmit;
+  final Function(String email, String password, String phone, String role)
+      onSubmit;
 
   const SignUpForm({
     super.key,
@@ -21,7 +22,7 @@ class _SignUpFormState extends State<SignUpForm> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
-  String _selectedRole = "Buyer"; // Default role
+  String _selectedRole = "BUYER"; // Changed from "Buyer" to "BUYER"
 
   @override
   void dispose() {
@@ -36,8 +37,8 @@ class _SignUpFormState extends State<SignUpForm> {
       widget.onSubmit(
         _emailController.text.trim(),
         _passwordController.text,
+        _selectedRole,
         _phoneController.text.trim(),
-        _selectedRole, // Pass role (Buyer/Seller)
       );
     }
   }
@@ -51,6 +52,7 @@ class _SignUpFormState extends State<SignUpForm> {
           // Phone field
           TextFormField(
             controller: _phoneController,
+            onSaved: (value) => _handleSubmit(),
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return "Phone number is required";
@@ -68,19 +70,25 @@ class _SignUpFormState extends State<SignUpForm> {
           // Email field
           TextFormField(
             controller: _emailController,
+            onSaved: (value) => _handleSubmit(),
             validator: emaildValidator.call,
             textInputAction: TextInputAction.next,
             keyboardType: TextInputType.emailAddress,
             decoration: InputDecoration(
               hintText: "Email address",
               prefixIcon: Padding(
-                padding: const EdgeInsets.symmetric(vertical: defaultPadding * 0.75),
+                padding:
+                    const EdgeInsets.symmetric(vertical: defaultPadding * 0.75),
                 child: SvgPicture.asset(
                   "assets/icons/Message.svg",
                   height: 24,
                   width: 24,
                   colorFilter: ColorFilter.mode(
-                    Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.3),
+                    Theme.of(context)
+                        .textTheme
+                        .bodyLarge!
+                        .color!
+                        .withOpacity(0.3),
                     BlendMode.srcIn,
                   ),
                 ),
@@ -92,18 +100,24 @@ class _SignUpFormState extends State<SignUpForm> {
           // Password field
           TextFormField(
             controller: _passwordController,
+            onSaved: (value) => _handleSubmit(),
             validator: passwordValidator.call,
             obscureText: true,
             decoration: InputDecoration(
               hintText: "Password",
               prefixIcon: Padding(
-                padding: const EdgeInsets.symmetric(vertical: defaultPadding * 0.75),
+                padding:
+                    const EdgeInsets.symmetric(vertical: defaultPadding * 0.75),
                 child: SvgPicture.asset(
                   "assets/icons/Lock.svg",
                   height: 24,
                   width: 24,
                   colorFilter: ColorFilter.mode(
-                    Theme.of(context).textTheme.bodyLarge!.color!.withOpacity(0.3),
+                    Theme.of(context)
+                        .textTheme
+                        .bodyLarge!
+                        .color!
+                        .withOpacity(0.3),
                     BlendMode.srcIn,
                   ),
                 ),
@@ -115,14 +129,15 @@ class _SignUpFormState extends State<SignUpForm> {
           // Role dropdown (Buyer/Seller)
           DropdownButtonFormField<String>(
             value: _selectedRole,
+            onSaved: (value) => _handleSubmit(),
             decoration: const InputDecoration(
               labelText: "Select Role",
               border: OutlineInputBorder(),
             ),
-            items: ["Buyer", "Seller"].map((role) {
+            items: const ["BUYER", "SELLER"].map((role) {
               return DropdownMenuItem(
                 value: role,
-                child: Text(role),
+                child: Text(role == "BUYER" ? "Buyer" : "Seller"),
               );
             }).toList(),
             onChanged: (value) {
@@ -132,12 +147,6 @@ class _SignUpFormState extends State<SignUpForm> {
             },
           ),
           const SizedBox(height: defaultPadding),
-
-          // Submit button
-          ElevatedButton(
-            onPressed: _handleSubmit,
-            child: const Text("Sign Up"),
-          ),
         ],
       ),
     );

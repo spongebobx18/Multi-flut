@@ -19,14 +19,16 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isLoading = false;
   bool _isChecked = false; // State for checkbox
 
-  void _handleSignUp(String email, String password,  String role, String phone) async {
-    if (_formKey.currentState!.validate() && _isChecked) { // Ensure checkbox is checked
+  void _handleSignUp(
+      String email, String password, String role, String phone) async {
+    if (_formKey.currentState!.validate() && _isChecked) {
+      // Ensure checkbox is checked
       setState(() {
         _isLoading = true;
       });
 
       try {
-        bool success = await _authService.signup(email, password,  role, phone);
+        bool success = await _authService.signup(email, password, role, phone);
         if (success) {
           Navigator.pushNamed(context, entryPointScreenRoute);
         }
@@ -41,7 +43,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
       }
     } else if (!_isChecked) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please accept the terms and conditions.")),
+        const SnackBar(
+            content: Text("Please accept the terms and conditions.")),
       );
     }
   }
@@ -64,7 +67,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Let’s get started!",
+                    "Let's get started!",
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
                   const SizedBox(height: defaultPadding / 2),
@@ -72,7 +75,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     "Please enter your valid data in order to create an account.",
                   ),
                   const SizedBox(height: defaultPadding),
-                  
+
                   // Updated to pass phone field
                   SignUpForm(
                     formKey: _formKey,
@@ -80,7 +83,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   ),
 
                   const SizedBox(height: defaultPadding),
-                  
+
                   // Checkbox for Terms & Conditions
                   Row(
                     children: [
@@ -127,8 +130,21 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   if (!_isLoading)
                     ElevatedButton(
                       onPressed: () {
-                        if (_formKey.currentState!.validate()) {
-                          _formKey.currentState!.save(); // Save form fields
+                        if (!_isChecked) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                  "Please accept the terms and conditions."),
+                            ),
+                          );
+                          return;
+                        }
+
+                        // Simply validate and save the form
+                        final formState = _formKey.currentState;
+                        if (formState != null && formState.validate()) {
+                          formState
+                              .save(); // This will trigger the onSaved callbacks
                         }
                       },
                       child: const Text("Continue"),
